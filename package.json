@@ -1,0 +1,19 @@
+{
+  "name": "calculo-danfes",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "pdfkit": "^0.17.2",
+    "py": "^0.0.0",
+    "xlsx": "^0.18.5",
+    "xlsx-stream": "^0.0.4",
+    "xlsx-stream-reader": "^1.1.1"
+  }
+}
