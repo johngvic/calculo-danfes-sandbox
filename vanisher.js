@@ -20,6 +20,21 @@ const retrievePendingData = (file) => {
   }
 }
 
+const retrieveDelinquentData = (files) => {
+  try {
+    const allDelinquentData = [];
+    for (const file of files) {
+      const data = fs.readFileSync(`./payloads/${file}_DELINQUENT.json`, "utf8");
+      const delinquentData = JSON.parse(data);
+      allDelinquentData.push(...delinquentData);
+    }
+    return allDelinquentData;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
 const targetAlreadyExists = (matrix, target) => {
   // I have a target value { name, code, rps, nf, installment } and a matrix of values [ [{ name, code, rps, nf, installment }], ...].
   // If within this matrix I find any object containing `name`, `code`, `rps` and `nf` equal to the target, I return true. Otherwise, I return false.
@@ -33,34 +48,28 @@ const targetAlreadyExists = (matrix, target) => {
   return false;
 }
 
-// customer C08047906000173 is a good delinquent example
+
 
 (() => {
   const files = ["092025", "102025", "112025", "122025", "012026"];
 
   for (let index = 0; index < files.length; index++) {
-    
-    // testing purposes
-    if (index == 1) {
-      break;
-    }
-
     const pendingData = retrievePendingData(files[index]);
     const eligibleRawFiles = files.slice(index);
     const register = [];
 
     for (const pending of pendingData) {
+      const allDelinquentData = index == 0 ? [] : retrieveDelinquentData(files.slice(0, index));
 
-      // this will ignore a pending customer already vanished across all files and include only new customers
-      if (targetAlreadyExists(register, pending)) {
+      if (targetAlreadyExists(allDelinquentData, pending)) {
         continue;
       }
-      
+
       let companyInstances = [pending];
 
       for (const rawFile of eligibleRawFiles) {
         const raw = retrieveRawData(rawFile);
-        const instances = raw.filter(({ name, code, rps, nf, installment }) => 
+        const instances = raw.filter(({ name, code, rps, nf, installment }) =>
           name == pending.name &&
           code == pending.code &&
           rps == pending.rps &&
@@ -73,6 +82,6 @@ const targetAlreadyExists = (matrix, target) => {
       register.push(companyInstances);
     }
 
-    fs.writeFileSync(`./payloads/${files[index]}_DELINQUENTS.json`, JSON.stringify(register, null, 2), () => {})
+    fs.writeFileSync(`./payloads/${files[index]}_DELINQUENT.json`, JSON.stringify(register, null, 2), () => { })
   }
 })()
